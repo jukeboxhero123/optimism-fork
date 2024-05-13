@@ -10,6 +10,7 @@ const  {
 
 const HUB_URL = "3.141.108.149:2283"; // URL + Port of the Hub
 const client = getInsecureHubRpcClient(HUB_URL);
+const FC_NETWORK = FarcasterNetwork.MAINNET;
 
 app.use(cors())
 app.use(express.json())    // <==== parse request body as JSON
@@ -28,7 +29,6 @@ const submitMessage = async (resultPromise) => {
 app.post('/cast', async (req, res) => {
     const FID = req.body.fid; // Your fid
     const ed25519Signer = new NobleEd25519Signer(hexToBytes(req.body.pk));
-    const FC_NETWORK = FarcasterNetwork.MAINNET;
     const dataOptions = {
         fid: FID,
         network: FC_NETWORK,
@@ -45,15 +45,64 @@ app.post('/cast', async (req, res) => {
         dataOptions,
         ed25519Signer
     ));
-    console.log(cast.error);
     if (cast.isOk()) {
         console.log('success');
         res.json('SUCCESS');
     } else {
-        console.log('fail');
+        console.log(cast.error);
         res.json('FAIL');
     }
+})
+app.post('/link', async (req, res) => {
+    const FID = req.body.fid; // Your fid
+    const ed25519Signer = new NobleEd25519Signer(hexToBytes(req.body.pk));
+    const dataOptions = {
+        fid: FID,
+        network: FC_NETWORK,
+    };
 
+    const link = await submitMessage(makeLinkAdd(
+        {
+            type: 'buddy',
+            targetFid: 352393,
+        },
+        dataOptions,
+        ed25519Signer
+    ));
+    if (link.isOk()) {
+        console.log('success');
+        res.json('SUCCESS');
+    } else {
+        console.log(cast.error);
+        res.json('FAIL');
+    }
+})
+
+app.post('/react', async (req, res) => {
+    const FID = req.body.fid; // Your fid
+    const ed25519Signer = new NobleEd25519Signer(hexToBytes(req.body.pk));
+    const dataOptions = {
+        fid: FID,
+        network: FC_NETWORK,
+    };
+
+    const castHash = '0x10294e1f86254bd7cb778669f5fa217296c8c7db';
+
+    const react = await submitMessage(makeReactionAdd(
+        {
+            type: 1,
+            targetCastId: { fid: 390759, hash: hexToBytes(castHash) },
+        },
+        dataOptions,
+        ed25519Signer
+    ));
+    if (react.isOk()) {
+        console.log('success');
+        res.json('SUCCESS');
+    } else {
+        console.log(cast.error);
+        res.json('FAIL');
+    }
 })
 
 app.listen(port, () => {
