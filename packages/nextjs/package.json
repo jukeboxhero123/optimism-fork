@@ -14,7 +14,9 @@
     "vercel:yolo": "vercel --build-env NEXT_PUBLIC_IGNORE_BUILD_ERROR=true"
   },
   "dependencies": {
+    "@farcaster/hub-web": "^0.8.8",
     "@heroicons/react": "~2.0.11",
+    "@noble/ed25519": "^2.1.0",
     "@rainbow-me/rainbowkit": "~2.0.2",
     "@tanstack/react-query": "~5.28.6",
     "@uniswap/sdk-core": "~4.0.1",
@@ -22,6 +24,7 @@
     "blo": "~1.0.1",
     "burner-connector": "^0.0.3",
     "daisyui": "4.5.0",
+    "ethers": "^6.12.1",
     "next": "~14.0.4",
     "next-themes": "~0.2.1",
     "nprogress": "~0.2.0",
@@ -32,7 +35,7 @@
     "react-hot-toast": "~2.4.0",
     "use-debounce": "~8.0.4",
     "usehooks-ts": "2.13.0",
-    "viem": "2.8.16",
+    "viem": "^2.10.3",
     "wagmi": "2.5.12",
     "zustand": "~4.1.2"
   },

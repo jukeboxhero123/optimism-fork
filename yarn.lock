@@ -12,6 +12,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@adraffy/ens-normalize@npm:1.10.1":
+  version: 1.10.1
+  resolution: "@adraffy/ens-normalize@npm:1.10.1"
+  checksum: 0836f394ea256972ec19a0b5e78cb7f5bcdfd48d8a32c7478afc94dd53ae44c04d1aa2303d7f3077b4f3ac2323b1f557ab9188e8059978748fdcd83e04a80dcc
+  languageName: node
+  linkType: hard
+
 "@alloc/quick-lru@npm:^5.2.0":
   version: 5.2.0
   resolution: "@alloc/quick-lru@npm:5.2.0"
@@ -950,6 +957,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@farcaster/core@npm:^0.14.11":
+  version: 0.14.11
+  resolution: "@farcaster/core@npm:0.14.11"
+  dependencies:
+    "@noble/curves": ^1.0.0
+    "@noble/hashes": ^1.3.0
+    bs58: ^5.0.0
+    neverthrow: ^6.0.0
+    viem: ^1.12.2
+  checksum: 06dfbbd125526809116e19d6bdc100abf53bc47d4afa44821d067133a7c17687f4cc785a36912c4f9f347150c72b7ca0675cb939761e201bb1b51c43e79c7ab2
+  languageName: node
+  linkType: hard
+
+"@farcaster/hub-web@npm:^0.8.8":
+  version: 0.8.8
+  resolution: "@farcaster/hub-web@npm:0.8.8"
+  dependencies:
+    "@farcaster/core": ^0.14.11
+    "@improbable-eng/grpc-web": ^0.15.0
+    rxjs: ^7.8.0
+  checksum: cfcecbb991f013a3683a42213ec0b38f3b792148947bb15c15a133c4295a8638c1338b1cfa3b47d04a26ee43498f39dcedb1746325ea60fd22c10fc0e4664a71
+  languageName: node
+  linkType: hard
+
 "@fastify/busboy@npm:^2.0.0":
   version: 2.1.1
   resolution: "@fastify/busboy@npm:2.1.1"
@@ -1013,6 +1044,17 @@ __metadata:
   version: 2.0.3
   resolution: "@humanwhocodes/object-schema@npm:2.0.3"
   checksum: d3b78f6c5831888c6ecc899df0d03bcc25d46f3ad26a11d7ea52944dc36a35ef543fad965322174238d677a43d5c694434f6607532cff7077062513ad7022631
+  languageName: node
+  linkType: hard
+
+"@improbable-eng/grpc-web@npm:^0.15.0":
+  version: 0.15.0
+  resolution: "@improbable-eng/grpc-web@npm:0.15.0"
+  dependencies:
+    browser-headers: ^0.4.1
+  peerDependencies:
+    google-protobuf: ^3.14.0
+  checksum: 8c6322e681965be4fcadf58fde0571f7972c36b48290474e87c7d12bed09b27163fd6ed73c6c36e896885da782abf1835bbeaf65b35bcdb65d9114ea8a0e6ba5
   languageName: node
   linkType: hard
 
@@ -1520,6 +1562,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:^1.0.0":
+  version: 1.4.0
+  resolution: "@noble/curves@npm:1.4.0"
+  dependencies:
+    "@noble/hashes": 1.4.0
+  checksum: 0014ff561d16e98da4a57e2310a4015e4bdab3b1e1eafcd18d3f9b955c29c3501452ca5d702fddf8ca92d570bbeadfbe53fe16ebbd81a319c414f739154bb26b
+  languageName: node
+  linkType: hard
+
+"@noble/ed25519@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@noble/ed25519@npm:2.1.0"
+  checksum: f9638d5daaaadaecf33cb09675668bde144cecb9a4467f78cda2a7fbd96a1b975a1f8d00e99599f840de52adc64e723333c7c8e52cdf85e3ef160d01b95c408c
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:1.2.0, @noble/hashes@npm:~1.2.0":
   version: 1.2.0
   resolution: "@noble/hashes@npm:1.2.0"
@@ -1541,7 +1599,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.4.0":
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.3.0, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.4.0":
   version: 1.4.0
   resolution: "@noble/hashes@npm:1.4.0"
   checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
@@ -2300,7 +2358,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
+    "@farcaster/hub-web": ^0.8.8
     "@heroicons/react": ~2.0.11
+    "@noble/ed25519": ^2.1.0
     "@rainbow-me/rainbowkit": ~2.0.2
     "@tanstack/react-query": ~5.28.6
     "@trivago/prettier-plugin-sort-imports": ~4.1.1
@@ -2320,6 +2380,7 @@ __metadata:
     eslint-config-next: ~14.0.4
     eslint-config-prettier: ~8.5.0
     eslint-plugin-prettier: ~4.2.1
+    ethers: ^6.12.1
     next: ~14.0.4
     next-themes: ~0.2.1
     nprogress: ~0.2.0
@@ -2336,7 +2397,7 @@ __metadata:
     use-debounce: ~8.0.4
     usehooks-ts: 2.13.0
     vercel: ~32.4.1
-    viem: 2.8.16
+    viem: ^2.10.3
     wagmi: 2.5.12
     zustand: ~4.1.2
   languageName: unknown
@@ -4963,6 +5024,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-x@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "base-x@npm:4.0.0"
+  checksum: b25db9e07eb1998472a20557c7f00c797dc0595f79df95155ab74274e7fa98b9f2659b3ee547ac8773666b7f69540656793aeb97ad2b1ceccdb6fa5faaf69ac0
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:^1.3.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -5100,6 +5168,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"browser-headers@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "browser-headers@npm:0.4.1"
+  checksum: 28b927dd90e4882eeb0625cd4a20a8e868f892144bca794a9b027fad9d2094656daf46473cb9084d650590504c581dd6a711146243035b66e75ade61bbe4d3cf
+  languageName: node
+  linkType: hard
+
 "browser-level@npm:^1.0.1":
   version: 1.0.1
   resolution: "browser-level@npm:1.0.1"
@@ -5153,6 +5228,15 @@ __metadata:
   dependencies:
     base-x: ^3.0.2
   checksum: b3c5365bb9e0c561e1a82f1a2d809a1a692059fae016be233a6127ad2f50a6b986467c3a50669ce4c18929dcccb297c5909314dd347a25a68c21b68eb3e95ac2
+  languageName: node
+  linkType: hard
+
+"bs58@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "bs58@npm:5.0.0"
+  dependencies:
+    base-x: ^4.0.0
+  checksum: 2475cb0684e07077521aac718e604a13e0f891d58cff923d437a2f7e9e28703ab39fce9f84c7c703ab369815a675f11e3bd394d38643bfe8969fbe42e6833d45
   languageName: node
   linkType: hard
 
@@ -7601,6 +7685,21 @@ __metadata:
     "@ethersproject/web": 5.7.1
     "@ethersproject/wordlists": 5.7.0
   checksum: b7c08cf3e257185a7946117dbbf764433b7ba0e77c27298dec6088b3bc871aff711462b0621930c56880ff0a7ceb8b1d3a361ffa259f93377b48e34107f62553
+  languageName: node
+  linkType: hard
+
+"ethers@npm:^6.12.1":
+  version: 6.12.1
+  resolution: "ethers@npm:6.12.1"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.1
+    "@noble/curves": 1.2.0
+    "@noble/hashes": 1.3.2
+    "@types/node": 18.15.13
+    aes-js: 4.0.0-beta.5
+    tslib: 2.4.0
+    ws: 8.5.0
+  checksum: ddf398c91f584b9e643740ec17a9c82b4a1c4ea3fb6efd00f1a043b89d1ec6f9427aa80894f75850ee805722e91b8d054bce18579a2c621226302c096774df90
   languageName: node
   linkType: hard
 
@@ -10873,6 +10972,13 @@ __metadata:
   version: 2.6.2
   resolution: "neo-async@npm:2.6.2"
   checksum: deac9f8d00eda7b2e5cd1b2549e26e10a0faa70adaa6fdadca701cc55f49ee9018e427f424bac0c790b7c7e2d3068db97f3093f1093975f2acb8f8818b936ed9
+  languageName: node
+  linkType: hard
+
+"neverthrow@npm:^6.0.0":
+  version: 6.2.1
+  resolution: "neverthrow@npm:6.2.1"
+  checksum: ff285e946389010444f2a98a08702fd6e6cffc6c7468ecf6a4fcd6bdac3feb636d47b72dc67d578c85870e6ff8c13ce9fa776147b48fb6b76625e02d955b9337
   languageName: node
   linkType: hard
 
@@ -14834,7 +14940,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:^1.0.0, viem@npm:^1.1.4":
+"viem@npm:^1.0.0, viem@npm:^1.1.4, viem@npm:^1.12.2":
   version: 1.21.4
   resolution: "viem@npm:1.21.4"
   dependencies:
@@ -14852,6 +14958,27 @@ __metadata:
     typescript:
       optional: true
   checksum: c351fdea2d53d2d781ac73c964348b3b9fc5dd46f9eb53903e867705fc9e30a893cb9f2c8d7a00acdcdeca27d14eeebf976eed9f948c28c47018dc9211369117
+  languageName: node
+  linkType: hard
+
+"viem@npm:^2.10.3":
+  version: 2.10.3
+  resolution: "viem@npm:2.10.3"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.0
+    "@noble/curves": 1.2.0
+    "@noble/hashes": 1.3.2
+    "@scure/bip32": 1.3.2
+    "@scure/bip39": 1.2.1
+    abitype: 1.0.0
+    isows: 1.0.3
+    ws: 8.13.0
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 0d307905bda2f320a323117f363475feec3dddba806dfd3f8f9b0f95b85e7b8556550dde5e1e228a432b3135e887e5c3296f9430f85f615b2f8cd101b690a2c9
   languageName: node
   linkType: hard
 
