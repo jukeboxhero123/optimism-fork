@@ -30,6 +30,7 @@
     "precommit": "lint-staged",
     "prepare": "install-self-peers -- --ignore-scripts",
     "start": "yarn workspace @se-2/nextjs dev",
+    "start-server": "yarn workspace @se-2/express start",
     "test": "yarn hardhat:test",
     "vercel": "yarn workspace @se-2/nextjs vercel",
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
@@ -47,5 +48,8 @@
   "packageManager": "yarn@3.2.3",
   "engines": {
     "node": ">=18.17.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.8"
   }
 }
