@@ -1,4 +1,5 @@
 import * as chains from "viem/chains";
+import {defineChain} from "viem";
 
 export type ScaffoldConfig = {
   targetNetworks: readonly chains.Chain[];
@@ -8,9 +9,22 @@ export type ScaffoldConfig = {
   onlyLocalBurnerWallet: boolean;
 };
 
+export const customHardhat = /*#__PURE__*/ defineChain({
+  id: 10,
+  name: 'Hardhat',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: { http: ['http://127.0.0.1:8545'] },
+  },
+})
+
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat],
+  targetNetworks: [customHardhat],
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect if you only target the local network (default is 4000)

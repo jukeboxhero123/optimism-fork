@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
+import {useAccount, useWalletClient} from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 import * as ed from '@noble/ed25519';
@@ -17,9 +17,9 @@ import {
   bundlerABI,
   KEY_GATEWAY_ADDRESS,
   keyGatewayABI,
-  verifyRegister,
+  verifyRegister, ViemWalletEip712Signer,
 } from '@farcaster/hub-web';
-import { bytesToHex, hexToBytes, createPublicClient, createWalletClient, http } from 'viem';
+import { bytesToHex, hexToBytes, createPublicClient, createWalletClient, http, PrivateKeyAccount } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {hardhat, optimism} from 'viem/chains';
 import {ethers} from "ethers";
@@ -28,31 +28,40 @@ const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600); // set the signat
 
 const WARPCAST_RECOVERY_PROXY = '0x00000000FcB080a4D6c39a9354dA9EB9bC104cd7';
 
-/** Use ViemWalletEip712Signer instead of ViemLocalEip712Signer to sign with metamask **/
-
-/** LOCAL CHAIN **/
-
-const publicClient = createPublicClient({
-  chain: hardhat,
-  transport: http('http://localhost:8545'),
-});
-
-const walletClient = createWalletClient({
-  chain: hardhat,
-  transport: http('http://localhost:8545'),
-});
-
-const APP_PRIVATE_KEY = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
-const ALICE_PRIVATE_KEY = '0xaa9b83f8943327f5567e2860eea926fa70fab97b42e9b563f507c6e0290de516';
-
-const app = privateKeyToAccount(APP_PRIVATE_KEY);
-const appAccountKey = new ViemLocalEip712Signer(app as any);
-
-const alice = privateKeyToAccount(ALICE_PRIVATE_KEY);
-const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
 
 
-/** ON CHAIN **/
+const Home: NextPage = () => {
+  const { address: connectedAddress } = useAccount();
+
+  const wagmiWC = useWalletClient();
+
+  /** LOCAL CHAIN **/
+
+  const publicClient = createPublicClient({
+    chain: optimism,
+    transport: http('http://localhost:8545'),
+  });
+
+  const walletClient = createWalletClient({
+    chain: optimism,
+    transport: http('http://localhost:8545'),
+  });
+
+  const APP_PRIVATE_KEY = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
+  const ALICE_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+
+  const app = privateKeyToAccount(APP_PRIVATE_KEY);
+  const appAccountKey = new ViemLocalEip712Signer(app as any);
+
+
+  const alice = privateKeyToAccount(ALICE_PRIVATE_KEY);
+  /** Use ViemWalletEip712Signer instead of ViemLocalEip712Signer to sign with metamask **/
+  const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
+//   const aliceAccountKey = new ViemWalletEip712Signer(wagmiWC.data as any);
+
+
+  /** ON CHAIN **/
 
 // const publicClient = createPublicClient({
 //   chain: optimism,
@@ -63,9 +72,9 @@ const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
 //   chain: optimism,
 //   transport: http(),
 // });
+//
 
-
-// const test = ethers.Wallet.fromPhrase('profit scrap anxiety duty super parade soon yellow develop used lunar method ocean beyond aim squeeze defy base doll attack exclude ecology latin expire');
+// const test = ethers.Wallet.fromPhrase(process.env.NEXT_PUBLIC_RECOVERY_PHRASE);
 // const app = privateKeyToAccount(test.privateKey as `0x${string}`);
 // const appAccountKey = new ViemLocalEip712Signer(app as any);
 //
@@ -74,12 +83,9 @@ const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
 // const alicef = privateKeyToAccount(alicePK as `0x${string}`);
 //
 // console.log(test2!.phrase, alicePK, alicef.address);
-// const alice = privateKeyToAccount(ALICE_PRIVATE_KEY as `0x${string}`);
+// const alice = privateKeyToAccount(alicePK as `0x${string}`);
 // const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
 
-
-const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
 
   const registerApp = async () => {
     /*******************************************************************************
@@ -162,7 +168,6 @@ const Home: NextPage = () => {
         nonce,
         deadline,
       }, registerSignature, hexToBytes(alice.address as `0x${string}`));
-      console.log(valid)
     } else {
       throw new Error('Failed to generate register signature');
     }
@@ -229,7 +234,6 @@ const Home: NextPage = () => {
             args: [0n],
           });
 
-          console.log(price);
           /**
            *  Call `register` with Alice's signatures, registration, and key parameters.
            */
@@ -271,6 +275,72 @@ const Home: NextPage = () => {
       }
     }
   }
+
+  const transfer = async (from: PrivateKeyAccount, to: PrivateKeyAccount) => {
+    const FROM_FID = await publicClient.readContract({
+      address: ID_REGISTRY_ADDRESS,
+      abi: idRegistryABI,
+      functionName: 'idOf',
+      args: [from.address],
+    });
+    const TO_FID = await publicClient.readContract({
+      address: ID_REGISTRY_ADDRESS,
+      abi: idRegistryABI,
+      functionName: 'idOf',
+      args: [to.address],
+    });
+
+    console.log('FROM FID:', FROM_FID);
+    console.log('TO FID:', TO_FID);
+
+    const nonce = await publicClient.readContract({
+      address: ID_REGISTRY_ADDRESS,
+      abi: idRegistryABI,
+      functionName: 'nonces',
+      args: [to.address],
+    });
+
+    const now = Math.floor(Date.now() / 1000);
+    const oneHour = 60 * 60;
+    const deadline = BigInt(now + oneHour);
+
+    const toAccountKey = new ViemLocalEip712Signer(to as any);
+
+    const signature = await toAccountKey.signTransfer({
+      fid: FROM_FID,
+      to: to.address as `0x${string}`,
+      nonce,
+      deadline,
+    });
+    if (signature.isOk()) {
+      const transferSignature = signature.value;
+      const { request } = await publicClient.simulateContract({
+        account: from,
+        address: ID_REGISTRY_ADDRESS,
+        abi: idRegistryABI,
+        functionName: 'transfer',
+        args: [to.address, deadline, bytesToHex(transferSignature)],
+      });
+      await walletClient.writeContract(request);
+
+      const FROM_FID = await publicClient.readContract({
+        address: ID_REGISTRY_ADDRESS,
+        abi: idRegistryABI,
+        functionName: 'idOf',
+        args: [from.address],
+      });
+      const TO_FID = await publicClient.readContract({
+        address: ID_REGISTRY_ADDRESS,
+        abi: idRegistryABI,
+        functionName: 'idOf',
+        args: [to.address],
+      });
+      console.log('------------ AFTER TRANSFER ------------');
+      console.log('FROM FID:', FROM_FID);
+      console.log('TO FID:', TO_FID);
+    }
+  }
+
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
@@ -286,7 +356,8 @@ const Home: NextPage = () => {
           <button onClick={registerApp}> REGISTER APP </button>
           <br />
           <button onClick={register}> REGISTER USER </button>
-
+          <br />
+          <button onClick={() => transfer(app, alice)}> TRANSFER </button>
           {/*<p className="text-center text-lg">*/}
           {/*  Get started by editing{" "}*/}
           {/*  <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">*/}
