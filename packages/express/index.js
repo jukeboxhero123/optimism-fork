@@ -5,26 +5,38 @@ const cors = require('cors')
 const {hexToBytes} = require('viem')
 const  {
     FarcasterNetwork,
-    getInsecureHubRpcClient, makeCastAdd, NobleEd25519Signer, makeReactionAdd, makeLinkAdd
+    getInsecureHubRpcClient, makeCastAdd, NobleEd25519Signer, makeReactionAdd, makeLinkAdd, getCastsByFid
 } = require("@farcaster/hub-nodejs")
 
-const HUB_URL = "3.141.108.149:2283"; // URL + Port of the Hub
+const HUB_URL = "localhost:2283"; // URL + Port of the Hub
+const HUB_URL_2 = "localhost:2285"; // URL + Port of the Hub
+
 const client = getInsecureHubRpcClient(HUB_URL);
-const FC_NETWORK = FarcasterNetwork.MAINNET;
+const client2 = getInsecureHubRpcClient(HUB_URL_2);
+const FC_NETWORK = FarcasterNetwork.DEVNET;
 
 app.use(cors())
 app.use(express.json())    // <==== parse request body as JSON
 
-app.get('/', (req, res) => {
-    res.json('Hello World!')
+app.get('/:hub/:fid', async (req, res) => {
+    const FID = Number(req.params.fid); // Your fid
+    const hub = Number(req.params.hub);
+    const castsResult = await (hub === 1 ? client : client2).getCastsByFid({ fid: FID })
+    console.log(FID, hub);
+    if (castsResult.isOk()) {
+        console.log('success');
+        res.json(castsResult);
+    } else {
+        res.status(500);
+    }
 })
 
-const submitMessage = async (resultPromise) => {
+const submitMessage = async (resultPromise, hub) => {
     const result = await resultPromise;
     if (result.isErr()) {
         throw new Error(`Error creating message: ${result.error}`);
     }
-    return await client.submitMessage(result.value);
+    return await (hub === 1 ? client : client2).submitMessage(result.value);
 };
 app.post('/cast', async (req, res) => {
     const FID = req.body.fid; // Your fid
@@ -33,6 +45,8 @@ app.post('/cast', async (req, res) => {
         fid: FID,
         network: FC_NETWORK,
     };
+
+    const hub = req.body.hub;
 
     const cast = await submitMessage(makeCastAdd(
         {
@@ -44,7 +58,7 @@ app.post('/cast', async (req, res) => {
         },
         dataOptions,
         ed25519Signer
-    ));
+    ), hub);
     if (cast.isOk()) {
         console.log('success');
         res.json('SUCCESS');

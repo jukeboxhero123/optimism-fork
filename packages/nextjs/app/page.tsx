@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { NextPage } from "next";
-import {useAccount, useWalletClient} from "wagmi";
+import {useAccount, useReadContract, useWalletClient} from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 import * as ed from '@noble/ed25519';
@@ -17,13 +17,14 @@ import {
   bundlerABI,
   KEY_GATEWAY_ADDRESS,
   keyGatewayABI,
-  verifyRegister, ViemWalletEip712Signer,
+  verifyRegister, ViemWalletEip712Signer, KEY_REGISTRY_ADDRESS, keyRegistryABI, Message,
 } from '@farcaster/hub-web';
 import { bytesToHex, hexToBytes, createPublicClient, createWalletClient, http, PrivateKeyAccount } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {hardhat, optimism} from 'viem/chains';
 import {ethers} from "ethers";
 import axios from 'axios';
+import {useEffect, useState } from "react";
 
 const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600); // set the signatures' deadline to 1 hour from now
 
@@ -36,58 +37,110 @@ const Home: NextPage = () => {
 
   const wagmiWC = useWalletClient();
 
+  const [appFID, setAppFID] = useState(0);
+  const [aliceFID, setAliceFID] = useState(0);
+  const [alicePK, setAlicePK] = useState('0x209ceef279b20792ad87a873576828bb3f9d0b0fa58001f4cfd4fb9f0b6cbe91');
+  const [hubId, setHubId] = useState(1);
+  const [casts, setCasts] = useState([]);
   /** LOCAL CHAIN **/
-
-//   const publicClient = createPublicClient({
-//     chain: optimism,
-//     transport: http('http://localhost:8545'),
-//   });
-//
-//   const walletClient = createWalletClient({
-//     chain: optimism,
-//     transport: http('http://localhost:8545'),
-//   });
-//
-//   const APP_PRIVATE_KEY = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
-//   const ALICE_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-//
-//
-//   const app = privateKeyToAccount(APP_PRIVATE_KEY);
-//   const appAccountKey = new ViemLocalEip712Signer(app as any);
-//
-//
-//   const alice = privateKeyToAccount(ALICE_PRIVATE_KEY);
-//   /** Use ViemWalletEip712Signer instead of ViemLocalEip712Signer to sign with metamask **/
-//   const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
-// //   const aliceAccountKey = new ViemWalletEip712Signer(wagmiWC.data as any);
-
-
-  /** ON CHAIN **/
 
   const publicClient = createPublicClient({
     chain: optimism,
-    transport: http(),
+    transport: http('http://localhost:8545'),
   });
 
   const walletClient = createWalletClient({
     chain: optimism,
-    transport: http(),
+    transport: http('http://localhost:8545'),
   });
 
+  const APP_PRIVATE_KEY = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
+  const ALICE_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+  const EXTRA_KEYS = [
+      '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
+      '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
+      '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
+      '0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba'
+  ];
 
-  const test = ethers.Wallet.fromPhrase(process.env.NEXT_PUBLIC_RECOVERY_PHRASE!);
-  const app = privateKeyToAccount(test.privateKey as `0x${string}`);
+  const app = privateKeyToAccount(APP_PRIVATE_KEY);
   const appAccountKey = new ViemLocalEip712Signer(app as any);
 
-  const test2 = ethers.Wallet.createRandom().mnemonic;
-  const alicePK = ethers.Wallet.fromPhrase(test2!.phrase).privateKey;
-  const alicef = privateKeyToAccount(alicePK as `0x${string}`);
 
-  // console.log(test2!.phrase, alicePK, alicef.address);
-  const alice = privateKeyToAccount(alicePK as `0x${string}`);
-  const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
+  const alice = privateKeyToAccount(ALICE_PRIVATE_KEY);
+  /** Use ViemWalletEip712Signer instead of ViemLocalEip712Signer to sign with metamask **/
+  // const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
+  const aliceAccountKey = new ViemWalletEip712Signer(wagmiWC.data as any);
 
 
+  /** ON CHAIN **/
+
+  // const publicClient = createPublicClient({
+  //   chain: optimism,
+  //   transport: http(),
+  // });
+  //
+  // const walletClient = createWalletClient({
+  //   chain: optimism,
+  //   transport: http(),
+  // });
+  //
+  //
+  // const test = ethers.Wallet.fromPhrase(process.env.NEXT_PUBLIC_RECOVERY_PHRASE!);
+  // const app = privateKeyToAccount(test.privateKey as `0x${string}`);
+  // const appAccountKey = new ViemLocalEip712Signer(app as any);
+  //
+  // const test2 = ethers.Wallet.createRandom().mnemonic;
+  // const alicePK = ethers.Wallet.fromPhrase(test2!.phrase).privateKey;
+  // const alicef = privateKeyToAccount(alicePK as `0x${string}`);
+  //
+  // // console.log(test2!.phrase, alicePK, alicef.address);
+  // const alice = privateKeyToAccount(alicePK as `0x${string}`);
+  // const aliceAccountKey = new ViemLocalEip712Signer(alice as any);
+  //
+
+  const app_fid = useReadContract({
+        address: ID_REGISTRY_ADDRESS,
+        abi: idRegistryABI,
+        functionName: 'idOf',
+        args: [app.address],
+  })?.data;
+
+  const alice_fid = useReadContract({
+    address: ID_REGISTRY_ADDRESS,
+    abi: idRegistryABI,
+    functionName: 'idOf',
+    args: [alice.address],
+  })?.data;
+
+  useEffect(() => { setAppFID(Number(app_fid)) }, [app_fid]);
+  useEffect(() => {
+    const id = Number(alice_fid);
+    setAliceFID(id);
+  }, [alice_fid]);
+
+  const simulateChainActivity = async () => {
+    await Promise.all(EXTRA_KEYS.map(async (pk) => {
+      const fakeUser = privateKeyToAccount(pk as `0x${string}`);
+
+      const price = await publicClient.readContract({
+        address: ID_GATEWAY_ADDRESS,
+        abi: idGatewayABI,
+        functionName: 'price',
+        args: [0n],
+      });
+
+      const { request } = await publicClient.simulateContract({
+        account: fakeUser,
+        address: ID_GATEWAY_ADDRESS,
+        abi: idGatewayABI,
+        functionName: 'register',
+        args: [WARPCAST_RECOVERY_PROXY, 0n],
+        value: price,
+      });
+      await walletClient.writeContract(request);
+    }))
+  }
   const registerApp = async () => {
     /*******************************************************************************
      * IdGateway - register - Register an app FID.
@@ -128,6 +181,7 @@ const Home: NextPage = () => {
     });
 
     console.log('APP FID:', APP_FID);
+    setAppFID(Number(APP_FID))
   }
 
   const register = async () => {
@@ -181,6 +235,8 @@ const Home: NextPage = () => {
      *  1. Create an Ed25519 account keypair for Alice and get the public key.
      */
     const privateKeyBytes = ed.utils.randomPrivateKey();
+    console.log(bytesToHex(privateKeyBytes));
+    setAlicePK(bytesToHex(privateKeyBytes));
     const accountKey = new NobleEd25519Signer(privateKeyBytes);
 
     let accountPubKey = new Uint8Array();
@@ -272,6 +328,7 @@ const Home: NextPage = () => {
             args: [alice.address],
           });
           console.log('USER ID:', MY_FID);
+          setAliceFID(Number(MY_FID))
         }
       }
     }
@@ -344,20 +401,32 @@ const Home: NextPage = () => {
 
   const castWithAppAccount = async (e: any) => {
     e.preventDefault();
-    const FID = await publicClient.readContract({
-      address: ID_REGISTRY_ADDRESS,
-      abi: idRegistryABI,
-      functionName: 'idOf',
-      args: [app.address],
-    });
     if (e.target.castText.value) {
       const res = await axios.post('http://localhost:3001/cast', {
         text: e.target.castText.value,
-        pk: process.env.NEXT_PUBLIC_SIGNING_KEY!,
-        fid: Number(FID),
+        pk: alicePK,
+        fid: Number(aliceFID),
+        hub: hubId,
       })
       console.log(res);
     }
+  }
+
+  const fetchStuff = async () => {
+    const res = await axios.get(`http://localhost:3001/${hubId}/${Number(aliceFID)}`);
+    console.log('casts:', res);
+    if (res.status === 200) {
+        setCasts(res.data.value.messages);
+    }
+  }
+
+  const switchHubs = () => {
+    if (hubId === 1) {
+      setHubId(2);
+    } else {
+      setHubId(1);
+    }
+    setCasts([]);
   }
 
   return (
@@ -372,16 +441,30 @@ const Home: NextPage = () => {
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
           </div>
+          <p> CURRENTLY CONNECTED TO HUB: {hubId} </p>
+          <button onClick={switchHubs}> SwitchHub </button>
+          <br />
           <button onClick={registerApp}> REGISTER APP </button>
           <br />
           <button onClick={register}> REGISTER USER </button>
           <br />
-          <button onClick={() => transfer(app, alice)}> TRANSFER </button>
+          {/*<button onClick={() => transfer(app, alice)}> TRANSFER </button>*/}
+          <button onClick={simulateChainActivity}> Simulate Chain Activity </button>
           <br />
           <form onSubmit={castWithAppAccount}>
             <input name="castText"/>
             <button type="submit"> CAST </button>
           </form>
+          <p> APP FID: {appFID} </p>
+          <p> ALICE FID: {aliceFID} </p>
+          <br />
+          <button onClick={() => { fetchStuff() }}>LOAD CASTS</button>
+          {
+            casts.map((cast: Message) =>
+              <p> {cast.data?.timestamp} {cast.data?.fid} {cast.data?.castAddBody?.text}</p>
+            )
+          }
+
           {/*<p className="text-center text-lg">*/}
           {/*  Get started by editing{" "}*/}
           {/*  <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">*/}
