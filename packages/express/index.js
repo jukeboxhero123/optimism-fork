@@ -24,7 +24,7 @@ app.get('/:hub/:fid', async (req, res) => {
     const hub = (hubId === 1 ? client : client2);
     const castsResult = await hub.getCastsByFid({ fid: FID })
     if (castsResult.isOk()) {
-        await Promise.all(castsResult.value.messages.map(async (m) => {
+        await Promise.all(castsResult.value.messages.map(async (m, i) => {
             const reactions = await client.getReactionsByCast({
                 targetCastId: {
                     /** Fid of the user who created the cast */
@@ -34,9 +34,10 @@ app.get('/:hub/:fid', async (req, res) => {
                 }
             });
             if (reactions.isOk()) {
-                console.log(JSON.stringify(reactions.value.messages));
+                castsResult.value.messages[i].reactions = reactions.value.messages;
             }
         }));
+
         res.json(castsResult);
     } else {
         res.status(500);
