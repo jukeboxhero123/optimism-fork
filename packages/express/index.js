@@ -20,11 +20,23 @@ app.use(express.json())    // <==== parse request body as JSON
 
 app.get('/:hub/:fid', async (req, res) => {
     const FID = Number(req.params.fid); // Your fid
-    const hub = Number(req.params.hub);
-    const castsResult = await (hub === 1 ? client : client2).getCastsByFid({ fid: FID })
-    console.log(FID, hub);
+    const hubId = Number(req.params.hub);
+    const hub = (hubId === 1 ? client : client2);
+    const castsResult = await hub.getCastsByFid({ fid: FID })
     if (castsResult.isOk()) {
-        console.log('success');
+        await Promise.all(castsResult.value.messages.map(async (m) => {
+            const reactions = await client.getReactionsByCast({
+                targetCastId: {
+                    /** Fid of the user who created the cast */
+                    fid: m.data.fid,
+                    /** Hash of the cast */
+                    hash: m.hash,
+                }
+            });
+            if (reactions.isOk()) {
+                console.log(JSON.stringify(reactions.value.messages));
+            }
+        }));
         res.json(castsResult);
     } else {
         res.status(500);
@@ -94,27 +106,31 @@ app.post('/link', async (req, res) => {
 
 app.post('/react', async (req, res) => {
     const FID = req.body.fid; // Your fid
+    const castFid = req.body.castFid;
+    const hash = req.body.castHash;
+    const type = req.body.type;
+
     const ed25519Signer = new NobleEd25519Signer(hexToBytes(req.body.pk));
     const dataOptions = {
         fid: FID,
         network: FC_NETWORK,
     };
 
-    const castHash = '0x10294e1f86254bd7cb778669f5fa217296c8c7db';
+    const hub = req.body.hub;
 
     const react = await submitMessage(makeReactionAdd(
         {
-            type: 1,
-            targetCastId: { fid: 390759, hash: hexToBytes(castHash) },
+            type,
+            targetCastId: { fid: castFid, hash: hexToBytes(hash) },
         },
         dataOptions,
         ed25519Signer
-    ));
+    ), hub);
     if (react.isOk()) {
         console.log('success');
         res.json('SUCCESS');
     } else {
-        console.log(cast.error);
+        console.log(react.error);
         res.json('FAIL');
     }
 })

@@ -17,7 +17,7 @@ import {
   bundlerABI,
   KEY_GATEWAY_ADDRESS,
   keyGatewayABI,
-  verifyRegister, ViemWalletEip712Signer, KEY_REGISTRY_ADDRESS, keyRegistryABI, Message,
+  verifyRegister, ViemWalletEip712Signer, KEY_REGISTRY_ADDRESS, keyRegistryABI, Message, bytesToHexString
 } from '@farcaster/hub-web';
 import { bytesToHex, hexToBytes, createPublicClient, createWalletClient, http, PrivateKeyAccount } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -39,7 +39,7 @@ const Home: NextPage = () => {
 
   const [appFID, setAppFID] = useState(0);
   const [aliceFID, setAliceFID] = useState(0);
-  const [alicePK, setAlicePK] = useState('0x209ceef279b20792ad87a873576828bb3f9d0b0fa58001f4cfd4fb9f0b6cbe91');
+  const [alicePK, setAlicePK] = useState(localStorage.getItem('pk') || '');
   const [hubId, setHubId] = useState(1);
   const [casts, setCasts] = useState([]);
   /** LOCAL CHAIN **/
@@ -235,7 +235,7 @@ const Home: NextPage = () => {
      *  1. Create an Ed25519 account keypair for Alice and get the public key.
      */
     const privateKeyBytes = ed.utils.randomPrivateKey();
-    console.log(bytesToHex(privateKeyBytes));
+    localStorage.setItem('pk', bytesToHex(privateKeyBytes));
     setAlicePK(bytesToHex(privateKeyBytes));
     const accountKey = new NobleEd25519Signer(privateKeyBytes);
 
@@ -429,6 +429,24 @@ const Home: NextPage = () => {
     setCasts([]);
   }
 
+  function toUInt8Array(buffer: any) {
+    const view = new Uint8Array(buffer.data.length);
+    buffer.data.forEach((v: number, i: number) => { view[i] = buffer.data[i] })
+
+    return view;
+  }
+  const onReact = async (reactType: number, fid: number, hash: Uint8Array) => {
+      const res = await axios.post('http://localhost:3001/react', {
+        fid: Number(aliceFID),
+        hub: hubId,
+        castFid: fid,
+        castHash: bytesToHex(toUInt8Array(hash)),
+        type: reactType,
+        pk: alicePK
+      });
+      console.log(res);
+  }
+
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
@@ -461,7 +479,15 @@ const Home: NextPage = () => {
           <button onClick={() => { fetchStuff() }}>LOAD CASTS</button>
           {
             casts.map((cast: Message) =>
-              <p> {cast.data?.timestamp} {cast.data?.fid} {cast.data?.castAddBody?.text}</p>
+              <>
+                { cast.data &&
+                  <>
+                    <p> {cast.data?.timestamp} {cast.data?.fid} {cast.data?.castAddBody?.text}</p>
+                    <button onClick={() => { onReact(1, cast.data!.fid, cast.hash);}}>Like</button>
+                    <button onClick={() => { onReact(3, cast.data!.fid, cast.hash);}}>Dislike</button>
+                  </>
+                }
+              </>
             )
           }
 
